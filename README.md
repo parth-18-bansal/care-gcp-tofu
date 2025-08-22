@@ -14,3 +14,5 @@
 3) After installing OpenTofu, manually create a Google Cloud Storage (GCS) bucket. During the execution of make init, provide the name of the bucket when prompted:
 
    make init
+
+Few more changes are left
