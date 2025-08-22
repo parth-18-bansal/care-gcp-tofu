@@ -1,7 +1,9 @@
-resource "google_compute_global_address" "care_pip" {
-  name = "care-pip"
+resource "google_compute_address" "care_pip" {
+  name   = "care-pip"
+  region = var.region
 }
 
+# It is a vpc with two subnets one for the gke cluster and other is for the database.
 module "vpc" {
   source  = "terraform-google-modules/network/google"
   version = "~> 11.0"
@@ -52,6 +54,17 @@ resource "google_compute_global_address" "services_range" {
   address_type  = "INTERNAL"
   prefix_length = 20
   network       = module.vpc.network_self_link
+}
+
+# static ip
+output "care_pip_name" {
+  value = google_compute_address.care_pip.name
+  sensitive = false
+}
+
+output "care_pip_address" {
+  value = google_compute_address.care_pip.address
+  sensitive = false
 }
 
 #### 4. Outputs for Downstream Modules

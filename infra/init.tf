@@ -1,6 +1,7 @@
 terraform {
   backend "gcs" {
     # configure bucket, prefix, credentials, etc.
+    prefix = "infra"
   }
 
   required_providers {
@@ -33,16 +34,8 @@ provider "google-beta" {
   region  = "asia-south1"
 }
 
-data "google_container_cluster" "primary" {
-  name     = module.gke_cluster.name
-  location = var.zone
-}
-
-data "google_client_config" "default" {}
-
 provider "kubernetes" {
   host                   = "https://${data.google_container_cluster.primary.endpoint}"
   token                  = data.google_client_config.default.access_token
   cluster_ca_certificate = base64decode(data.google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
 }
-

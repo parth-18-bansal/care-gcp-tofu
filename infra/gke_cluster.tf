@@ -1,3 +1,4 @@
+# It is a Zonal Cluster with two worker nodes.
 module "gke_cluster" {
   source  = "terraform-google-modules/kubernetes-engine/google"
   version = "~> 36.3"
@@ -26,11 +27,20 @@ module "gke_cluster" {
   ]
 }
 
-output "gke_cluster_name" {
+output "cluster_name" {
   description = "The name of the GKE cluster"
   value       = module.gke_cluster.name
 }
 
+output "cluster_location" {
+  value = module.gke_cluster.location
+}
+
+output "project_id" {
+  value = var.project_id
+}
+
+# gke_endpoint and gke_ca_certificate are used by the kubernetes provider to send the requests to the cluster.
 output "gke_endpoint" {
   description = "The endpoint of the GKE cluster"
   value       = module.gke_cluster.endpoint
@@ -40,14 +50,4 @@ output "gke_ca_certificate" {
   description = "The base64 encoded public certificate for the cluster"
   value       = module.gke_cluster.ca_certificate
   sensitive   = true
-}
-
-output "gke_node_sa" {
-  value = module.gke_cluster.service_account
-}
-
-resource "google_project_iam_member" "gke_nodes_secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${module.gke_cluster.service_account}"
 }

@@ -24,8 +24,6 @@ module "care_django_deployment" {
       secret_ref = { name = "care-production" }
     }
   ]
-
-  depends_on = [module.gke_cluster]
 }
 
 # Celery Beat Deployment
@@ -46,8 +44,6 @@ module "care_celery_beat" {
       secret_ref = { name = "care-production" }
     }
   ]
-
-  depends_on = [module.gke_cluster]
 }
 
 # Celery Worker Deployment
@@ -68,8 +64,6 @@ module "care_celery_worker" {
       secret_ref = { name = "care-production" }
     }
   ]
-
-  depends_on = [module.gke_cluster]
 }
 
 module "care_redis" {
@@ -81,9 +75,85 @@ module "care_redis" {
   image     = "redis/redis-stack-server:6.2.6-v10"
   replicas  = 1
   internal_port = var.redis_port
-
-  depends_on = [module.gke_cluster]
 }
+
+module "care_frontend" {
+  source = "git::https://github.com/tellmeY18/terraform-kubernetes-deployment.git?ref=main"
+
+  name      = "care-fe-production"
+  namespace = kubernetes_namespace.care_namespace.metadata[0].name
+  custom_labels = var.frontend_custom_label
+  image     = "ghcr.io/ohcnetwork/care_fe:latest"
+  internal_port = var.frontend_port
+  image_pull_policy = var.frontend_image_pull_policy
+
+  replicas          = 1
+
+  # volumes from config map
+  volume_config_map = [
+    {
+      volume_name = "care-fe-production"
+      name        = "care-fe-production"
+      mode        = null 
+      items = [
+        {
+          key  = "config.json"
+          path = "config.json"
+        }
+      ]
+    }
+  ]
+
+  # volume mount inside the container
+  volume_mount = [
+    {
+      volume_name = "care-fe-production"
+      mount_path  = "/usr/share/nginx/html/config.json"
+      sub_path    = "config.json"
+      read_only   = true
+    }
+  ]
+}
+
+# module "care_nginx" {
+#   source = "git::https://github.com/tellmeY18/terraform-kubernetes-deployment.git?ref=main"
+
+#   name      = "care-nginx-production"
+#   namespace = kubernetes_namespace.care_namespace.metadata[0].name
+#   custom_labels = var.nginx_custom_label
+#   image     = "nginx:1.21"
+#   internal_port = var.nginx_port
+
+#   replicas          = 1
+
+#   # volumes from config map
+#   volume_config_map = [
+#     {
+#       volume_name = "nginx-conf-production"
+#       name        = "nginx-conf-production"
+#       mode        = null 
+#       items = [
+#         {
+#           key  = "nginx.conf"
+#           path = "nginx.conf"
+#         }
+#       ]
+#     }
+#   ]
+
+#   # volume mount inside the container
+#   volume_mount = [
+#     {
+#       volume_name = "nginx-conf-production"
+#       mount_path  = "/etc/nginx/nginx.conf"
+#       sub_path    = "nginx.conf"
+#     }
+#   ]
+
+#   depends_on = [
+#     module.care_service
+#   ]
+# }
 
 
 

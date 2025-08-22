@@ -47,7 +47,6 @@ module "facility_bucket" {
   depends_on = [module.service_accounts]
 }
 
-
 output "writer_service_account_email" {
   description = "The email of the service account used for bucket operations"
   value       = local.writer_sa_email

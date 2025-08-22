@@ -56,43 +56,8 @@ variable "zone" {
   type        = string
 }
 
-
 # Database
 variable "alloydb_cpu_count" {
   description = "The number of CPUs to allocate for the AlloyDB machine."
   type        = number
 }
-
-# variable "alloydb_read_pool_size" {
-#   type = number
-# }
-
-# Care App
-variable "care_app_label" {
-    description = ""
-    default = {
-        app = "care-app"
-    }
-    
-}
-
-# Redis 
-variable "redis_port" {
-  description = "List of ports to expose from the redis container"
-    default = [
-    {
-      name = "redis-port"
-      internal_port = "6379"
-    }
-  ]
-}
-
-variable "redis_custom_label" {
-    default = {
-        app = "redis-cache-production"
-    }
-}
-
-
-
-
